@@ -24,6 +24,16 @@ import logging
 import os
 import sys
 
+# Configure oracledb to work as cx_Oracle replacement for SQLAlchemy 1.4
+# This must be done before any SQLAlchemy imports
+try:
+    import oracledb
+    oracledb.version = "8.3.0"  # Fake cx_Oracle version for SQLAlchemy compatibility
+    sys.modules["cx_Oracle"] = oracledb
+    logging.getLogger().info("oracledb configured as cx_Oracle replacement")
+except ImportError:
+    pass  # oracledb not installed
+
 from celery.schedules import crontab
 from flask_caching.backends.filesystemcache import FileSystemCache
 
@@ -104,6 +114,22 @@ class CeleryConfig:
 
 
 CELERY_CONFIG = CeleryConfig
+
+# Idioma español habilitado
+BABEL_DEFAULT_LOCALE = "es"
+LANGUAGES = {
+    "es": {"flag": "es", "name": "Spanish"},
+    "en": {"flag": "us", "name": "English"},
+}
+
+# Bases de datos preferidas (Oracle y MSSQL)
+PREFERRED_DATABASES = [
+    "PostgreSQL",
+    "MySQL",
+    "SQLite",
+    "Oracle",
+    "Microsoft SQL Server",
+]
 
 FEATURE_FLAGS = {"ALERT_REPORTS": True}
 ALERT_REPORTS_NOTIFICATION_DRY_RUN = True

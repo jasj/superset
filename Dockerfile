@@ -187,14 +187,16 @@ COPY scripts/check-env.py scripts/
 # keeping for backward compatibility
 COPY --chmod=755 ./docker/entrypoints/run-server.sh /usr/bin/
 
-# Some debian libs
+# Some debian libs + MSSQL (FreeTDS) dependencies
 RUN /app/docker/apt-install.sh \
       curl \
       libsasl2-dev \
       libsasl2-modules-gssapi-mit \
       libpq-dev \
       libecpg-dev \
-      libldap2-dev
+      libldap2-dev \
+      freetds-dev \
+      freetds-bin
 
 # Create data directory for DuckDB examples database
 # The database file will be created at runtime when examples are loaded from Parquet files
@@ -229,9 +231,9 @@ COPY superset-core superset-core
 
 RUN --mount=type=cache,target=${SUPERSET_HOME}/.cache/uv \
     /app/docker/pip-install.sh --requires-build-essential -r requirements/base.txt
-# Install the superset package
+# Install the superset package with MSSQL and Oracle support
 RUN --mount=type=cache,target=${SUPERSET_HOME}/.cache/uv \
-    uv pip install -e .
+    uv pip install -e ".[mssql,oracle]"
 RUN python -m compileall /app/superset
 
 USER superset
@@ -261,7 +263,7 @@ RUN --mount=type=cache,target=${SUPERSET_HOME}/.cache/uv \
 RUN --mount=type=cache,target=${SUPERSET_HOME}/.cache/uv \
     uv pip install -e .
 
-RUN uv pip install .[postgres]
+RUN uv pip install ".[postgres,mssql,oracle]"
 RUN python -m compileall /app/superset
 
 USER superset
@@ -271,7 +273,7 @@ USER superset
 ######################################################################
 FROM lean AS ci
 USER root
-RUN uv pip install .[postgres,duckdb]
+RUN uv pip install ".[postgres,duckdb,mssql,oracle]"
 USER superset
 CMD ["/app/docker/entrypoints/docker-ci.sh"]
 
@@ -280,6 +282,6 @@ CMD ["/app/docker/entrypoints/docker-ci.sh"]
 ######################################################################
 FROM lean AS showtime
 USER root
-RUN uv pip install .[duckdb]
+RUN uv pip install ".[duckdb,mssql,oracle]"
 USER superset
 CMD ["/app/docker/entrypoints/docker-ci.sh"]

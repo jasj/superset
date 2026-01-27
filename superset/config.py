@@ -352,10 +352,10 @@ AUTH_RATE_LIMIT = "5 per second"
 # GLOBALS FOR APP Builder
 # ------------------------------
 # Uncomment to setup Your App name
-APP_NAME = "Superset"
+APP_NAME = "KolbiBI"
 
 # Specify the App icon
-APP_ICON = "/static/assets/images/superset-logo-horiz.png"
+APP_ICON = "/static/assets/images/kolbi.png"
 
 # Specify where clicking the logo would take the user'
 # Default value of None will take you to '/superset/welcome'
@@ -414,7 +414,7 @@ PUBLIC_ROLE_LIKE: str | None = None
 # Babel config for translations
 # ---------------------------------------------------
 # Setup default language
-BABEL_DEFAULT_LOCALE = "en"
+BABEL_DEFAULT_LOCALE = "es"
 # Your application default translation path
 BABEL_DEFAULT_FOLDER = "superset/translations"
 # The allowed translation for your app
@@ -437,9 +437,11 @@ LANGUAGES = {
     "nl": {"flag": "nl", "name": "Dutch"},
     "uk": {"flag": "uk", "name": "Ukranian"},
 }
-# Turning off i18n by default as translation in most languages are
-# incomplete and not well maintained.
-LANGUAGES = {}
+# Habilitar español como idioma principal
+LANGUAGES = {
+    "es": {"flag": "es", "name": "Spanish"},
+    "en": {"flag": "us", "name": "English"},
+}
 
 
 # Override the default d3 locale format
@@ -2005,7 +2007,8 @@ PREFERRED_DATABASES: list[str] = [
     "Presto",
     "MySQL",
     "SQLite",
-    # etc.
+    "Oracle",
+    "Microsoft SQL Server",
 ]
 # When adding a new database we try to connect to it. Depending on which parameters are
 # incorrect this could take a couple minutes, until the SQLAlchemy driver pinging the

@@ -17,7 +17,6 @@
  * under the License.
  */
 const zlib = require('zlib');
-const { ZSTDDecompress } = require('simple-zstd');
 
 const yargs = require('yargs');
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -128,8 +127,6 @@ function processHTML(proxyResponse, response) {
     uncompress = zlib.createBrotliDecompress();
   } else if (responseEncoding === 'deflate') {
     uncompress = zlib.createInflate();
-  } else if (responseEncoding === 'zstd') {
-    uncompress = ZSTDDecompress();
   }
   if (uncompress) {
     originalResponse.pipe(uncompress);
@@ -159,6 +156,10 @@ module.exports = newManifest => {
     changeOrigin: true,
     cookieDomainRewrite: '', // remove cookie domain
     selfHandleResponse: true, // so that the onProxyRes takes care of sending the response
+    onProxyReq(proxyReq) {
+      // Request uncompressed responses to avoid decompression issues
+      proxyReq.setHeader('Accept-Encoding', 'gzip, deflate, br');
+    },
     onProxyRes(proxyResponse, request, response) {
       try {
         copyHeaders(proxyResponse, response);

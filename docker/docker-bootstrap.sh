@@ -42,7 +42,8 @@ if [ "$CYPRESS_CONFIG" == "true" ]; then
     PORT=8081
 fi
 # Skip postgres requirements installation for workers to avoid conflicts
-if [[ "$DATABASE_DIALECT" == postgres* ]] && [ "$(whoami)" = "root" ] && [ "$1" != "worker" ] && [ "$1" != "beat" ]; then
+# Also skip if DEV_MODE is not true (packages already installed in image)
+if [[ "$DATABASE_DIALECT" == postgres* ]] && [ "$(whoami)" = "root" ] && [ "$1" != "worker" ] && [ "$1" != "beat" ] && [ "$DEV_MODE" == "true" ]; then
     # older images may not have the postgres dev requirements installed
     echo "Installing postgres requirements"
     if command -v uv > /dev/null 2>&1; then
