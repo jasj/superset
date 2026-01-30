@@ -169,10 +169,10 @@ const mockedProps = {
         ],
       },
     ],
-    brand: {
+    brand: { 
       path: '/superset/welcome/',
-      icon: '/static/assets/images/superset-logo-horiz.png',
-      alt: 'Apache Superset',
+      icon: '/static/assets/images/sibuBI-logo.png',
+      alt: 'SibuBI Logo',
       width: '126',
       tooltip: '',
       text: '',

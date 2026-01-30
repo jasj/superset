@@ -18,3 +18,6 @@
 #
 -e .[development,bigquery,druid,duckdb,fastmcp,gevent,gsheets,mysql,postgres,presto,prophet,trino,thumbnails]
 -e ./superset-extensions-cli[test]
+
+# SQL Server driver
+pymssql>=2.2.8
