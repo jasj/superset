@@ -15776,4 +15776,3 @@ msgid "zoom area"
 msgstr "область масштабирования"
 
 msgid "© Layer attribution"
-msgstr "© Настройки слоя"

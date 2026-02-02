@@ -59,22 +59,156 @@ enum AuthType {
   AuthOauth = 4,
 }
 
+const LoginContainer = styled.div`
+  ${({ theme }) => css`
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, ${theme.colorPrimary}15 0%, ${theme.colorPrimaryBg} 100%);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(
+        circle,
+        ${theme.colorPrimary}08 0%,
+        transparent 70%
+      );
+      animation: pulse 15s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.1);
+        opacity: 0.8;
+      }
+    }
+  `}
+`;
+
 const StyledCard = styled(Card)`
   ${({ theme }) => css`
-    max-width: 400px;
+    max-width: 440px;
     width: 100%;
-    margin-top: ${theme.marginXL}px;
-    color: ${theme.colorBgContainer};
-    background: ${theme.colorBgBase};
+    background: ${theme.colorBgContainer};
+    border-radius: ${theme.borderRadiusLG}px;
+    box-shadow: 0 8px 32px ${theme.colorPrimary}20,
+                0 2px 8px ${theme.colorBorder};
+    border: 1px solid ${theme.colorBorderSecondary};
+    position: relative;
+    z-index: 1;
+
+    .ant-card-head {
+      border-bottom: 1px solid ${theme.colorBorderSecondary};
+      padding: ${theme.paddingLG}px ${theme.paddingXL}px;
+
+      .ant-card-head-title {
+        font-size: ${theme.fontSizeHeading3}px;
+        font-weight: ${theme.fontWeightStrong};
+        color: ${theme.colorText};
+        text-align: center;
+        padding: ${theme.paddingSM}px 0;
+      }
+    }
+
+    .ant-card-body {
+      padding: ${theme.paddingXL}px;
+    }
+
     .ant-form-item-label label {
-      color: ${theme.colorPrimary};
+      color: ${theme.colorText};
+      font-weight: ${theme.fontWeightStrong};
+    }
+
+    .ant-input-affix-wrapper,
+    .ant-input-password {
+      padding: ${theme.paddingSM}px ${theme.paddingMD}px;
+      border-radius: ${theme.borderRadius}px;
+      border: 1px solid ${theme.colorBorder};
+      transition: all 0.3s ease;
+
+      &:hover {
+        border-color: ${theme.colorPrimaryHover};
+      }
+
+      &:focus,
+      &:focus-within {
+        border-color: ${theme.colorPrimary};
+        box-shadow: 0 0 0 2px ${theme.colorPrimaryBg};
+      }
+    }
+
+    .ant-btn-primary {
+      height: 40px;
+      font-weight: ${theme.fontWeightStrong};
+      border-radius: ${theme.borderRadius}px;
+      box-shadow: 0 2px 8px ${theme.colorPrimary}30;
+
+      &:hover {
+        box-shadow: 0 4px 12px ${theme.colorPrimary}40;
+        transform: translateY(-1px);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+
+    .ant-btn-default {
+      height: 40px;
+      border-radius: ${theme.borderRadius}px;
     }
   `}
 `;
 
 const StyledLabel = styled(Typography.Text)`
   ${({ theme }) => css`
-    font-size: ${theme.fontSizeSM}px;
+    font-size: ${theme.fontSize}px;
+    font-weight: ${theme.fontWeightStrong};
+  `}
+`;
+
+const WelcomeText = styled(Typography.Text)`
+  ${({ theme }) => css`
+    font-size: ${theme.fontSize}px;
+    color: ${theme.colorTextSecondary};
+    text-align: center;
+    display: block;
+    margin-bottom: ${theme.marginMD}px;
+  `}
+`;
+
+const BrandTitle = styled.div`
+  ${({ theme }) => css`
+    text-align: center;
+    margin-bottom: ${theme.marginXL}px;
+
+    h1 {
+      font-size: ${theme.fontSizeHeading2}px;
+      font-weight: ${theme.fontWeightStrong};
+      color: ${theme.colorPrimary};
+      margin: 0 0 ${theme.marginXS}px 0;
+      background: linear-gradient(135deg, ${theme.colorPrimary} 0%, ${theme.colorPrimaryActive} 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    p {
+      font-size: ${theme.fontSizeSM}px;
+      color: ${theme.colorTextTertiary};
+      margin: 0;
+    }
   `}
 `;
 
@@ -152,24 +286,25 @@ export default function Login() {
   };
 
   return (
-    <Flex
-      justify="center"
-      align="center"
-      data-test="login-form"
-      css={css`
-        width: 100%;
-        height: calc(100vh - 200px);
-      `}
-    >
-      <StyledCard title={t('Sign in')} padded>
+    <LoginContainer data-test="login-form">
+      <StyledCard padded>
+        <BrandTitle>
+          <h1>Apache Superset</h1>
+          <p>{t('Data Visualization Platform')}</p>
+        </BrandTitle>
+
         {authType === AuthType.AuthOID && (
           <Flex justify="center" vertical gap="middle">
+            <WelcomeText>
+              {t('Choose your authentication provider')}
+            </WelcomeText>
             <Form layout="vertical" requiredMark="optional" form={form}>
               {providers.map((provider: OIDProvider) => (
-                <Form.Item<LoginForm>>
+                <Form.Item<LoginForm> key={provider.name}>
                   <Button
                     href={buildProviderLoginUrl(provider.name)}
                     block
+                    size="large"
                     iconPosition="start"
                     icon={getAuthIconElement(provider.name)}
                   >
@@ -180,14 +315,19 @@ export default function Login() {
             </Form>
           </Flex>
         )}
+
         {authType === AuthType.AuthOauth && (
           <Flex justify="center" gap={0} vertical>
+            <WelcomeText>
+              {t('Choose your authentication provider')}
+            </WelcomeText>
             <Form layout="vertical" requiredMark="optional" form={form}>
               {providers.map((provider: OAuthProvider) => (
-                <Form.Item<LoginForm>>
+                <Form.Item<LoginForm> key={provider.name}>
                   <Button
                     href={buildProviderLoginUrl(provider.name)}
                     block
+                    size="large"
                     iconPosition="start"
                     icon={getAuthIconElement(provider.name)}
                   >
@@ -200,10 +340,10 @@ export default function Login() {
         )}
 
         {(authType === AuthType.AuthDB || authType === AuthType.AuthLDAP) && (
-          <Flex justify="center" vertical gap="middle">
-            <Typography.Text type="secondary">
-              {t('Enter your login and password below:')}
-            </Typography.Text>
+          <Flex justify="center" vertical gap="small">
+            <WelcomeText>
+              {t('Welcome back! Please sign in to continue')}
+            </WelcomeText>
             <Form
               layout="vertical"
               requiredMark="optional"
@@ -211,7 +351,7 @@ export default function Login() {
               onFinish={onFinish}
             >
               <Form.Item<LoginForm>
-                label={<StyledLabel>{t('Username:')}</StyledLabel>}
+                label={<StyledLabel>{t('Username')}</StyledLabel>}
                 name="username"
                 rules={[
                   { required: true, message: t('Please enter your username') },
@@ -219,31 +359,32 @@ export default function Login() {
               >
                 <Input
                   autoFocus
+                  size="large"
+                  placeholder={t('Enter your username')}
                   prefix={<Icons.UserOutlined iconSize="l" />}
                   data-test="username-input"
                 />
               </Form.Item>
               <Form.Item<LoginForm>
-                label={<StyledLabel>{t('Password:')}</StyledLabel>}
+                label={<StyledLabel>{t('Password')}</StyledLabel>}
                 name="password"
                 rules={[
                   { required: true, message: t('Please enter your password') },
                 ]}
               >
                 <Input.Password
+                  size="large"
+                  placeholder={t('Enter your password')}
                   prefix={<Icons.KeyOutlined iconSize="l" />}
                   data-test="password-input"
                 />
               </Form.Item>
               <Form.Item label={null}>
-                <Flex
-                  css={css`
-                    width: 100%;
-                  `}
-                >
+                <Flex vertical gap="middle">
                   <Button
                     block
                     type="primary"
+                    size="large"
                     htmlType="submit"
                     loading={loading}
                     data-test="login-button"
@@ -254,10 +395,11 @@ export default function Login() {
                     <Button
                       block
                       type="default"
+                      size="large"
                       href="/register/"
                       data-test="register-button"
                     >
-                      {t('Register')}
+                      {t('Create an account')}
                     </Button>
                   )}
                 </Flex>
@@ -266,6 +408,6 @@ export default function Login() {
           </Flex>
         )}
       </StyledCard>
-    </Flex>
+    </LoginContainer>
   );
 }

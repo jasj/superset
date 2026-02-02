@@ -14642,4 +14642,3 @@ msgid "zoom area"
 msgstr "縮放面積"
 
 msgid "© Layer attribution"
-msgstr ""

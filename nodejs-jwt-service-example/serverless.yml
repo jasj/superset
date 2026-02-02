@@ -1,0 +1,134 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+# Serverless Framework 4 Configuration
+# JWT Authentication Service for Superset
+
+service: superset-jwt-auth
+
+frameworkVersion: '4'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ${opt:region, 'us-east-1'}
+  stage: ${opt:stage, 'dev'}
+  
+  # Environment variables
+  environment:
+    NODE_ENV: ${self:provider.stage}
+    JWT_SECRET: ${env:JWT_SECRET}
+    JWT_EXPIRATION: ${env:JWT_EXPIRATION, '1h'}
+    CORS_ORIGIN: ${env:CORS_ORIGIN, 'https://superset.yourdomain.com'}
+    # Add your database connection strings here
+    # DB_HOST: ${env:DB_HOST}
+    # DB_PORT: ${env:DB_PORT}
+    # DB_NAME: ${env:DB_NAME}
+    # DB_USER: ${env:DB_USER}
+    # DB_PASSWORD: ${env:DB_PASSWORD}
+  
+  # IAM permissions
+  iam:
+    role:
+      statements:
+        # Add permissions for your database or other AWS services
+        # Example for DynamoDB:
+        # - Effect: Allow
+        #   Action:
+        #     - dynamodb:Query
+        #     - dynamodb:GetItem
+        #     - dynamodb:PutItem
+        #   Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}"
+        
+        # Example for Secrets Manager:
+        # - Effect: Allow
+        #   Action:
+        #     - secretsmanager:GetSecretValue
+        #   Resource: "arn:aws:secretsmanager:${self:provider.region}:*:secret:jwt-secret-*"
+
+  # API Gateway configuration
+  httpApi:
+    cors:
+      allowedOrigins:
+        - ${self:provider.environment.CORS_ORIGIN}
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+      allowedMethods:
+        - GET
+        - POST
+        - OPTIONS
+      allowCredentials: true
+
+# Functions
+functions:
+  auth:
+    handler: handler.handler
+    timeout: 10
+    memorySize: 256
+    events:
+      # Login endpoint
+      - httpApi:
+          path: /api/auth/login
+          method: POST
+      # Verify token endpoint
+      - httpApi:
+          path: /api/auth/verify
+          method: GET
+      # Registration endpoint (optional)
+      - httpApi:
+          path: /api/auth/register
+          method: POST
+      # Health check
+      - httpApi:
+          path: /health
+          method: GET
+
+# Plugins
+plugins:
+  - serverless-offline
+  - serverless-dotenv-plugin
+
+# Custom configuration
+custom:
+  # Serverless Offline configuration for local development
+  serverless-offline:
+    httpPort: 3000
+    lambdaPort: 3002
+    
+  # DotEnv plugin configuration
+  dotenv:
+    path: .env.${self:provider.stage}
+    basePath: ./
+    include:
+      - JWT_SECRET
+      - JWT_EXPIRATION
+      - CORS_ORIGIN
+
+# Package configuration
+package:
+  exclude:
+    - .git/**
+    - .gitignore
+    - README.md
+    - test/**
+    - "*.md"
+    - .env*
+  include:
+    - server.js
+    - handler.js
+    - package.json

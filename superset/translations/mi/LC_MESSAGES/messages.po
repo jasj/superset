@@ -14504,4 +14504,3 @@ msgid "zoom area"
 msgstr "horahanga topa"
 
 msgid "© Layer attribution"
-msgstr "© Whakatuakī Papa"

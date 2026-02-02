@@ -15615,4 +15615,3 @@ msgid "zoom area"
 msgstr "obszar powiększenia"
 
 msgid "© Layer attribution"
-msgstr ""

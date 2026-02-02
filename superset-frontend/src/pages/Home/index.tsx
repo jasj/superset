@@ -391,7 +391,7 @@ function Welcome({ user, addDangerToast }: WelcomeProps) {
                         user={user}
                         mine={dashboardData}
                         showThumbnails={checked}
-                        otherTabData={activityData?.[TableTab.Other]}
+                        otherTabData={activityData?.[TableTab.Other] ?? []}
                         otherTabFilters={otherTabFilters}
                         otherTabTitle={otherTabTitle}
                       />
@@ -408,7 +408,7 @@ function Welcome({ user, addDangerToast }: WelcomeProps) {
                         showThumbnails={checked}
                         user={user}
                         mine={chartData}
-                        otherTabData={activityData?.[TableTab.Other]}
+                        otherTabData={activityData?.[TableTab.Other] ?? []}
                         otherTabFilters={otherTabFilters}
                         otherTabTitle={otherTabTitle}
                       />

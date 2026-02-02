@@ -17448,4 +17448,3 @@ msgid "zoom area"
 msgstr "zone de zoom"
 
 msgid "© Layer attribution"
-msgstr "© Attribution de la couche"

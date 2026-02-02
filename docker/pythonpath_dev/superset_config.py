@@ -129,6 +129,67 @@ if os.getenv("CYPRESS_CONFIG") == "true":
 
     sys.path.pop(0)
 
+# ==============================================================================
+# LANGUAGE/LOCALE CONFIGURATION
+# ==============================================================================
+# Set the default language to Spanish
+BABEL_DEFAULT_LOCALE = "es"
+
+# Available languages - make sure Spanish is included
+LANGUAGES = {
+    "en": {"flag": "us", "name": "English"},
+    "es": {"flag": "es", "name": "Spanish"},
+    "it": {"flag": "it", "name": "Italian"},
+    "fr": {"flag": "fr", "name": "French"},
+    "zh": {"flag": "cn", "name": "Chinese"},
+    "ja": {"flag": "jp", "name": "Japanese"},
+    "de": {"flag": "de", "name": "German"},
+    "pt": {"flag": "pt", "name": "Portuguese"},
+    "pt_BR": {"flag": "br", "name": "Brazilian Portuguese"},
+    "ru": {"flag": "ru", "name": "Russian"},
+    "ko": {"flag": "kr", "name": "Korean"},
+}
+
+# ==============================================================================
+# JWT AUTHENTICATION CONFIGURATION
+# ==============================================================================
+# Import the custom JWT Security Manager
+from superset.security.jwt_manager import JWTSecurityManager
+
+# Set the custom security manager
+CUSTOM_SECURITY_MANAGER = JWTSecurityManager
+
+# JWT Service Configuration
+# URL of your Node.js serverless authentication service
+JWT_LOGIN_SERVICE_URL = os.getenv(
+    "JWT_LOGIN_SERVICE_URL",
+    "http://host.docker.internal:3000/api/auth/login"
+)
+
+# JWT Secret Key - MUST match the secret used by your Node.js service
+JWT_SECRET_KEY = os.getenv(
+    "JWT_SECRET_KEY",
+    "your-secret-key-here"  # CHANGE THIS!
+)
+
+# JWT Algorithm (common: HS256, RS256)
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+
+# JWT Verification
+JWT_VERIFY = os.getenv("JWT_VERIFY", "True").lower() == "true"
+
+# Sync user roles from JWT claims
+JWT_SYNC_ROLES = os.getenv("JWT_SYNC_ROLES", "False").lower() == "true"
+
+# Default role for new users when JWT_SYNC_ROLES is False
+# Options: Admin, Alpha, Gamma, sql_lab, Public
+# Alpha: Can create and edit dashboards/charts (recommended default)
+# Gamma: Can only view assigned dashboards
+# Public: Very limited access
+AUTH_USER_REGISTRATION_ROLE = os.getenv("AUTH_USER_REGISTRATION_ROLE", "Alpha")
+
+# ==============================================================================
+
 #
 # Optionally import superset_config_docker.py (which will have been included on
 # the PYTHONPATH) in order to allow for local settings to be overridden

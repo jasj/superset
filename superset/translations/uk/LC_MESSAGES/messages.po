@@ -14895,4 +14895,3 @@ msgid "zoom area"
 msgstr "масштаб"
 
 msgid "© Layer attribution"
-msgstr ""

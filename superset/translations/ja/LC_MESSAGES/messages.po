@@ -13778,4 +13778,3 @@ msgid "zoom area"
 msgstr "ズームエリア"
 
 msgid "© Layer attribution"
-msgstr ""

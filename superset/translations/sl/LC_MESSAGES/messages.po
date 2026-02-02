@@ -14659,4 +14659,3 @@ msgid "zoom area"
 msgstr "približaj območje"
 
 msgid "© Layer attribution"
-msgstr ""

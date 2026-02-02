@@ -14637,4 +14637,3 @@ msgid "zoom area"
 msgstr "منطقه‌ی زوم"
 
 msgid "© Layer attribution"
-msgstr ""
