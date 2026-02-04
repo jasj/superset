@@ -5,12 +5,18 @@ FROM apache/superset:4.1.2
 
 USER root
 
+# Create pythonpath directory if it doesn't exist
+RUN mkdir -p /app/pythonpath
+
 # Copy custom security manager and views
 COPY superset/security/jwt_manager.py /app/superset/security/jwt_manager.py
 COPY superset/views/jwt_auth.py /app/superset/views/jwt_auth.py
 
 # Copy production configuration to pythonpath
 COPY docker/pythonpath_prod/superset_config.py /app/pythonpath/superset_config.py
+
+# Ensure PYTHONPATH includes our config directory
+ENV PYTHONPATH="/app/pythonpath:${PYTHONPATH}"
 
 # Ensure correct permissions
 RUN chown -R superset:superset /app/pythonpath /app/superset/security /app/superset/views
