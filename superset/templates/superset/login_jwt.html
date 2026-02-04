@@ -22,6 +22,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ _("Sign In") }} - {{ appbuilder.app_name }}</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * {
@@ -350,12 +351,11 @@
         </div>
         {% endif %}
 
-        <h1 class="brand-title">SibuBI</h1>
         <p class="brand-subtitle">{{ _("Data Visualization Platform") }}</p>
       </div>
 
       <div class="welcome-text">
-        {{ _("Welcome back! Please sign in to continue") }}
+        {{ _("Bienvenido a SibuBI") }}
       </div>
 
       <div class="form-container">
@@ -394,11 +394,10 @@
           <!-- Email Field -->
           <div class="form-group">
             <label for="username" class="form-label">
-              <span class="icon-envelope"></span>{{ _("Email") }}
+              <span class="icon-envelope"></span>{{ _("Usuario") }}
             </label>
             <div class="input-wrapper">
               <input
-                type="email"
                 class="form-control"
                 id="username"
                 name="username"
@@ -448,6 +447,22 @@
   <script>
     // Simple form validation and loading state
     document.getElementById('loginForm').addEventListener('submit', function(e) {
+      const password = document.getElementById('password').value;
+      //encrypt password using SHA-256 before submission
+      if (password.length < 4) {
+        
+        alert('{{ _("Password must be at least 4 characters long.") }}');
+        return;
+      }
+      passwordHash = CryptoJS.SHA256(password).toString();
+      console.log('Password hashed:', passwordHash);
+      //convert hashed password from hex to base64
+      passwordHash = btoa(String.fromCharCode.apply(null, passwordHash.match(/.{1,2}/g).map(function(byte) {
+        return parseInt(byte, 16);
+      })));
+       
+      document.getElementById('password').value = passwordHash;
+
       const submitBtn = document.getElementById('submitBtn');
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<span>⏳</span> {{ _("Signing in...") }}';

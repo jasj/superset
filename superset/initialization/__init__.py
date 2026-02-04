@@ -709,6 +709,7 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         self.configure_feature_flags()
         self.configure_db_encrypt()
         self.setup_db()
+        self.configure_tenant_database_manager()
 
         # Check database connection and warn if unavailable
         self.check_and_warn_database_connection()
@@ -758,6 +759,14 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
 
     def configure_stats_manager(self) -> None:
         stats_logger_manager.init_app(self.superset_app)
+
+    def configure_tenant_database_manager(self) -> None:
+        """Initialize multi-tenant database manager if enabled"""
+        if self.config.get("MULTI_TENANT_ENABLED", False):
+            from superset.utils.tenant_database_manager import tenant_db_manager
+
+            tenant_db_manager.init_app(self.superset_app)
+            logger.info("Multi-tenant database manager configured")
 
     def setup_event_logger(self) -> None:
         _event_logger["event_logger"] = get_event_logger_from_cfg_value(

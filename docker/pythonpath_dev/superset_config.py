@@ -35,6 +35,7 @@ DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
 DATABASE_HOST = os.getenv("DATABASE_HOST")
 DATABASE_PORT = os.getenv("DATABASE_PORT")
 DATABASE_DB = os.getenv("DATABASE_DB")
+DATABASE_SSL_MODE = os.getenv("DATABASE_SSL_MODE", "")
 
 EXAMPLES_USER = os.getenv("EXAMPLES_USER")
 EXAMPLES_PASSWORD = os.getenv("EXAMPLES_PASSWORD")
@@ -43,10 +44,11 @@ EXAMPLES_PORT = os.getenv("EXAMPLES_PORT")
 EXAMPLES_DB = os.getenv("EXAMPLES_DB")
 
 # The SQLAlchemy connection string.
+_ssl_params = f"?sslmode={DATABASE_SSL_MODE}" if DATABASE_SSL_MODE else ""
 SQLALCHEMY_DATABASE_URI = (
     f"{DATABASE_DIALECT}://"
     f"{DATABASE_USER}:{DATABASE_PASSWORD}@"
-    f"{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_DB}"
+    f"{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_DB}{_ssl_params}"
 )
 
 # Use environment variable if set, otherwise construct from components
@@ -163,7 +165,8 @@ CUSTOM_SECURITY_MANAGER = JWTSecurityManager
 # URL of your Node.js serverless authentication service
 JWT_LOGIN_SERVICE_URL = os.getenv(
     "JWT_LOGIN_SERVICE_URL",
-    "http://host.docker.internal:3000/api/auth/login"
+   # "http://host.docker.internal:3000/api/auth/login"
+    "https://z7jtx5k2g7.execute-api.us-east-1.amazonaws.com/dev/login"
 )
 
 # JWT Secret Key - MUST match the secret used by your Node.js service
@@ -187,6 +190,47 @@ JWT_SYNC_ROLES = os.getenv("JWT_SYNC_ROLES", "False").lower() == "true"
 # Gamma: Can only view assigned dashboards
 # Public: Very limited access
 AUTH_USER_REGISTRATION_ROLE = os.getenv("AUTH_USER_REGISTRATION_ROLE", "Alpha")
+
+# ==============================================================================
+# EMBEDDED DASHBOARD / GUEST TOKEN CONFIGURATION
+# ==============================================================================
+# Guest token settings for embedded dashboards
+GUEST_TOKEN_JWT_SECRET = os.getenv("GUEST_TOKEN_JWT_SECRET", "test-guest-secret-change-me")
+GUEST_TOKEN_JWT_ALGO = "HS256"
+GUEST_TOKEN_JWT_EXP_SECONDS = 300  # 5 minutes
+GUEST_TOKEN_HEADER_NAME = "X-GuestToken"
+
+# Allow guest users to apply filters (workaround for "cannot modify chart payload" error)
+# This overrides the strict payload validation for guest users
+# WARNING: Only enable this in development or if you understand the security implications
+GUEST_ROLE_NAME = "Public"
+
+# DEVELOPMENT ONLY: Allow guest tokens to modify chart payloads
+# This bypasses the security check that prevents guest users from modifying chart queries
+# Set to True to fix "Guest user cannot modify chart payload" errors in embedded dashboards
+GUEST_TOKEN_ALLOW_MODIFIED_PAYLOAD = os.getenv(
+    "GUEST_TOKEN_ALLOW_MODIFIED_PAYLOAD", "True"
+).lower() == "true"
+
+# Enable embedded superset feature flag
+FEATURE_FLAGS = {
+    **FEATURE_FLAGS,
+    "EMBEDDED_SUPERSET": True,
+}
+
+# ==============================================================================
+# MULTI-TENANT DATABASE CONFIGURATION
+# ==============================================================================
+# Enable multi-tenant database routing
+# Each tenant will connect to a database named after the tenant identifier
+# Example: tenant "acme" connects to database "acme"
+
+MULTI_TENANT_ENABLED = os.getenv("MULTI_TENANT_ENABLED", "True").lower() == "true"
+
+# Database name template for tenants
+# Available placeholders: {tenant}
+# Example: "{tenant}_db" would create databases like "acme_db", "demo_db"
+TENANT_DATABASE_TEMPLATE = os.getenv("TENANT_DATABASE_TEMPLATE", "{tenant}")
 
 # ==============================================================================
 

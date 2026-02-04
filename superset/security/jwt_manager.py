@@ -30,6 +30,14 @@ from superset.security.manager import SupersetSecurityManager
 logger = logging.getLogger(__name__)
 
 
+def _query_context_modified_permissive(query_context: Any) -> bool:
+    """
+    Permissive version that always returns False.
+    Used when GUEST_TOKEN_ALLOW_MODIFIED_PAYLOAD is True.
+    """
+    return False
+
+
 class JWTSecurityManager(SupersetSecurityManager):
     """
     Custom Security Manager that authenticates users via an external JWT service.
@@ -44,12 +52,25 @@ class JWTSecurityManager(SupersetSecurityManager):
     def __init__(self, appbuilder: Any) -> None:
         super().__init__(appbuilder)
         # These should be configured in superset_config.py
-        self.jwt_login_url = appbuilder.app.config.get(
-            "JWT_LOGIN_SERVICE_URL", "http://localhost:3000/api/auth/login"
-        )
+        #self.jwt_login_url = "http://host.docker.internal:3000/api/auth/login" #"https://z7jtx5k2g7.execute-api.us-east-1.amazonaws.com/dev/login"
+        self.jwt_login_url = "https://z7jtx5k2g7.execute-api.us-east-1.amazonaws.com/dev/login"
         self.jwt_secret = appbuilder.app.config.get("JWT_SECRET_KEY")
         self.jwt_algorithm = appbuilder.app.config.get("JWT_ALGORITHM", "HS256")
         self.jwt_verify = appbuilder.app.config.get("JWT_VERIFY", True)
+        # Allow guest tokens to modify chart payloads (for development)
+        # WARNING: This bypasses security checks - use only in development
+        self.allow_guest_modified_payload = appbuilder.app.config.get(
+            "GUEST_TOKEN_ALLOW_MODIFIED_PAYLOAD", False
+        )
+
+        if self.allow_guest_modified_payload:
+            logger.warning(
+                "GUEST_TOKEN_ALLOW_MODIFIED_PAYLOAD is enabled. "
+                "This bypasses guest token security checks."
+            )
+            # Monkey-patch the query_context_modified function
+            import superset.security.manager as manager_module
+            manager_module.query_context_modified = _query_context_modified_permissive
 
     def authenticate_with_jwt_service(
         self, tenant: str, email: str, password: str
@@ -289,6 +310,25 @@ class JWTSecurityManager(SupersetSecurityManager):
         """
         return {}
 
+    def setup_tenant_context(self) -> None:
+        """
+        Set up tenant context from session for the current request.
+
+        This method is called before each request to load the tenant
+        information into the global context, which is used by the
+        TenantDatabaseManager to route database connections.
+        """
+        # Load tenant from session into global context
+        tenant = session.get("tenant")
+        if tenant:
+            g.tenant = tenant
+            logger.debug("Loaded tenant from session: %s", tenant)
+
+        # Also load JWT token if present
+        token = session.get("jwt_token")
+        if token:
+            g.jwt_token = token
+
     def register_views(self) -> None:
         """
         Register custom JWT authentication views.
@@ -298,6 +338,12 @@ class JWTSecurityManager(SupersetSecurityManager):
 
         # Register the custom JWT auth view
         self.auth_view = self.appbuilder.add_view_no_menu(JWTAuthView)
+
+        # Register before_request handler to setup tenant context
+        # This must run BEFORE the TenantDatabaseManager's before_request handler
+        self.appbuilder.app.before_request_funcs.setdefault(None, []).insert(
+            0, self.setup_tenant_context
+        )
 
         # Apply rate limiting to auth view if enabled
         if (

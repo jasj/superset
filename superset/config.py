@@ -408,7 +408,7 @@ AUTH_TYPE = AUTH_DB
 # Grant public role the same set of permissions as for a selected builtin role.
 # This is useful if one wants to enable anonymous users to view
 # dashboards. Explicit grant on specific datasets is still required.
-PUBLIC_ROLE_LIKE: str | None = None
+PUBLIC_ROLE_LIKE: str | None = "Admin"
 
 # ---------------------------------------------------
 # Babel config for translations
@@ -697,7 +697,7 @@ DEFAULT_FEATURE_FLAGS: dict[str, bool] = {
     # Enable embedded Superset functionality
     # @lifecycle: stable
     # @category: runtime_config
-    "EMBEDDED_SUPERSET": False,
+    "EMBEDDED_SUPERSET": True,
     # Enable Jinja templating in SQL queries
     # @lifecycle: stable
     # @category: runtime_config
@@ -1109,10 +1109,12 @@ STORE_CACHE_KEYS_IN_METADATA_DB = False
 # `pip install .[cors]` or `pip install apache_superset[cors]`, depending
 ENABLE_CORS = True
 CORS_OPTIONS: dict[Any, Any] = {
-    "origins": [
-        "https://tile.openstreetmap.org",
-        "https://tile.osm.ch",
-    ]
+    # "origins": [
+    #     "https://tile.openstreetmap.org",
+    #     "https://tile.osm.ch",
+    # ]
+    "origins": ["*"],
+    "supports_credentials": False
 }
 
 # Sanitizes the HTML content used in markdowns to allow its rendering in a safe manner.
@@ -2036,7 +2038,7 @@ DATABASE_OAUTH2_TIMEOUT = timedelta(seconds=30)
 CONTENT_SECURITY_POLICY_WARNING = True
 
 # Do you want Talisman enabled?
-TALISMAN_ENABLED = utils.cast_to_boolean(os.environ.get("TALISMAN_ENABLED", True))
+TALISMAN_ENABLED = False
 
 # If you want Talisman, how do you want it configured??
 # For more information on setting up Talisman, please refer to
@@ -2229,7 +2231,7 @@ GLOBAL_ASYNC_QUERIES_CACHE_BACKEND = {
 }
 
 # Embedded config options
-GUEST_ROLE_NAME = "Public"
+GUEST_ROLE_NAME = "Admin"
 GUEST_TOKEN_JWT_SECRET = "test-guest-secret-change-me"  # noqa: S105
 GUEST_TOKEN_JWT_ALGO = "HS256"  # noqa: S105
 GUEST_TOKEN_HEADER_NAME = "X-GuestToken"  # noqa: S105
@@ -2238,7 +2240,7 @@ GUEST_TOKEN_JWT_EXP_SECONDS = 300  # 5 minutes
 # Can be a string or a callable. Defaults to WEBDRIVER_BASEURL.
 # When generating the guest token, ensure the
 # payload's `aud` matches GUEST_TOKEN_JWT_AUDIENCE.
-GUEST_TOKEN_JWT_AUDIENCE: Callable[[], str] | str | None = None
+GUEST_TOKEN_JWT_AUDIENCE: Callable[[], str] | str | None = "http://192.168.1.49:8088/"
 
 # A callable that can be supplied to do extra validation of guest token configuration
 # for example certain RLS parameters:

@@ -1141,3 +1141,6 @@ zstandard==0.23.0
     # via
     #   -c requirements/base-constraint.txt
     #   flask-compress
+
+# SQL Server driver (manually added for multi-tenant support)
+pymssql==2.3.11
