@@ -1,0 +1,39 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_REGION: "us-east-1"
+    ECR_REPO: "084828580816.dkr.ecr.us-east-1.amazonaws.com/superset"
+    IMAGE_TAG: "latest"
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO
+      - echo Login successful
+
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image with target prod...
+      - docker build --platform linux/amd64 --target prod -f Dockerfile.prod -t $ECR_REPO:$IMAGE_TAG -t $ECR_REPO:v1 .
+      - echo Build completed on `date`
+
+  post_build:
+    commands:
+      - echo Pushing the Docker images to ECR...
+      - docker push $ECR_REPO:$IMAGE_TAG
+      - docker push $ECR_REPO:v1
+      - echo Push completed on `date`
+      - echo Writing image definitions file...
+      - printf '[{"name":"superset","imageUri":"%s"}]' $ECR_REPO:$IMAGE_TAG > imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
+
+cache:
+  paths:
+    - '/root/.npm/**/*'
+    - '/root/.cache/**/*'

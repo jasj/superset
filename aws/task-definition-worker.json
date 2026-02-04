@@ -1,0 +1,42 @@
+{
+  "family": "superset-worker",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::084828580816:role/superset-ecs-execution-role",
+  "taskRoleArn": "arn:aws:iam::084828580816:role/superset-ecs-task-role",
+  "containerDefinitions": [
+    {
+      "name": "superset-worker",
+      "image": "084828580816.dkr.ecr.us-east-1.amazonaws.com/superset:latest",
+      "essential": true,
+      "command": ["celery", "--app=superset.tasks.celery_app:app", "worker", "--pool=prefork", "-O", "fair", "-c", "2"],
+      "environment": [
+        {"name": "SUPERSET_ENV", "value": "production"},
+        {"name": "PYTHONPATH", "value": "/app/pythonpath:/app/docker/pythonpath_prod"},
+        {"name": "DATABASE_DIALECT", "value": "postgresql"},
+        {"name": "DATABASE_HOST", "value": "sibubi.cluster-c5qscoiacao2.us-east-1.rds.amazonaws.com"},
+        {"name": "DATABASE_PORT", "value": "5432"},
+        {"name": "DATABASE_USER", "value": "postgres"},
+        {"name": "DATABASE_PASSWORD", "value": "SQLwertyuiop123"},
+        {"name": "DATABASE_DB", "value": "superset"},
+        {"name": "REDIS_HOST", "value": "sibu-erp-ftu3cp.serverless.use1.cache.amazonaws.com"},
+        {"name": "REDIS_PORT", "value": "6379"},
+        {"name": "REDIS_SSL", "value": "true"},
+        {"name": "REDIS_CELERY_DB", "value": "0"},
+        {"name": "REDIS_RESULTS_DB", "value": "1"},
+        {"name": "SUPERSET_SECRET_KEY", "value": "xR3mP9vK2nL7qW4jF8cY1bZ6aH5dG0sT"},
+        {"name": "CELERYD_CONCURRENCY", "value": "2"}
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/superset",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "worker"
+        }
+      }
+    }
+  ]
+}

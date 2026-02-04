@@ -1,0 +1,67 @@
+{
+  "family": "superset",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::084828580816:role/superset-ecs-execution-role",
+  "taskRoleArn": "arn:aws:iam::084828580816:role/superset-ecs-task-role",
+  "containerDefinitions": [
+    {
+      "name": "superset",
+      "image": "084828580816.dkr.ecr.us-east-1.amazonaws.com/superset:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8088,
+          "hostPort": 8088,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {"name": "SUPERSET_ENV", "value": "production"},
+        {"name": "SUPERSET_PORT", "value": "8088"},
+        {"name": "PYTHONPATH", "value": "/app/pythonpath:/app/docker/pythonpath_prod"},
+        {"name": "DATABASE_DIALECT", "value": "postgresql"},
+        {"name": "DATABASE_HOST", "value": "sibubi.cluster-c5qscoiacao2.us-east-1.rds.amazonaws.com"},
+        {"name": "DATABASE_PORT", "value": "5432"},
+        {"name": "DATABASE_USER", "value": "postgres"},
+        {"name": "DATABASE_PASSWORD", "value": "SQLwertyuiop123"},
+        {"name": "DATABASE_DB", "value": "superset"},
+        {"name": "REDIS_HOST", "value": "sibu-erp-ftu3cp.serverless.use1.cache.amazonaws.com"},
+        {"name": "REDIS_PORT", "value": "6379"},
+        {"name": "REDIS_SSL", "value": "true"},
+        {"name": "REDIS_CELERY_DB", "value": "0"},
+        {"name": "REDIS_RESULTS_DB", "value": "1"},
+        {"name": "SUPERSET_SECRET_KEY", "value": "xR3mP9vK2nL7qW4jF8cY1bZ6aH5dG0sT"},
+        {"name": "SUPERSET_APP_ROOT", "value": "/"},
+        {"name": "FLASK_DEBUG", "value": "false"},
+        {"name": "SUPERSET_LOG_LEVEL", "value": "INFO"},
+        {"name": "SUPERSET_LOAD_EXAMPLES", "value": "no"},
+        {"name": "JWT_LOGIN_SERVICE_URL", "value": "https://api.sibuerp.dev/api/auth/login"},
+        {"name": "JWT_SECRET_KEY", "value": "your-secret-key-here"},
+        {"name": "JWT_ALGORITHM", "value": "HS256"},
+        {"name": "JWT_VERIFY", "value": "true"},
+        {"name": "JWT_SYNC_ROLES", "value": "true"},
+        {"name": "MULTI_TENANT_ENABLED", "value": "true"},
+        {"name": "TENANT_DATABASE_TEMPLATE", "value": "{tenant}"},
+        {"name": "AUTH_USER_REGISTRATION_ROLE", "value": "Alpha"}
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/superset",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:8088/health || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 120
+      }
+    }
+  ]
+}
